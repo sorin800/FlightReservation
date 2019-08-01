@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link th:href="@{/assets/css/displayFlights.css}" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="container well well-lg" th:if="${noFlightsFound}">
+		<h1>No flights we're found!</h1>
+		<a th:href="@{/showLogin}">Go Back!</a>
+</div>
+<div class="container well well-lg" th:if="${foundFlights}">
+    <h2 class="title">
+        <span>Flights: </span>
+        <span th:text="${departure}" class="color-red"></span>
+        <span class="glyphicon glyphicon-plane color-red"></span>
+        <span th:text="${destination}" class="color-red"></span>
+    </h2>
+    <span th:text="${msg}"></span>
+    <div>
+        <table class="table table-striped">
+            <tr>
+                <th>Airlines</th>
+                <th>Departure City</th>
+                <th>Arrival City</th>
+                <th>Departure Time</th>
+                <th></th>
+            </tr>
+
+            <tr th:each="flight: ${flights}">
+                <td th:text="${flight.operatingAirlines}"/>
+                <td th:text="${flight.departureCity}"/>
+                <td th:text="${flight.arrivalCity}"/>
+                <td th:text="${flight.estimatedDepartureTime}"/>
+                <td><a class="btn btn-primary btn-lg"
+                       th:href="@{'showCompleteReservation?flightId=' + ${flight.id}}">Select</a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+        </div>
+        <div class="col-md-6 well purple-bg" th:if="${foundCurrency}">
+            <h3><span class="glyphicon glyphicon-euro"></span>EXCHANGE RATES</h3>
+            <span class="label label-default" th:text="'Date: ' + ${currency.date}">Date: </span> <br/>
+            <span class="label label-default" th:text="'Base currency: ' + ${currency.base}">Date: </span> <br/>
+            <div class="table-wrapper-scroll-y" >
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Value Conversion/ 1 Unit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="rate: ${currency.rates}">
+                        <th scope="row">1</th>
+                        <td th:text="${rate.key}">key</td>
+                        <td th:text="${{rate.value}}">Value</td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

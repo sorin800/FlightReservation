@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	crossorigin="anonymous">
+	<!-- Custom styles for this template -->
+<link th:href="@{/assets/css/findFlights.css}" rel="stylesheet">
+<style>
+	a {font-size: 25px}
+</style>
+</head>
+<body>
+	<div class="container body-content">
+	<a th:href="@{/logout}"><b>LOGOUT</b></a>
+		<div class="row" style="padding-top: 80px">
+		    <div class="col-md-4 well well-lg">
+				<h2>Find flights:</h2>
+				<form th:action="@{/findFlights}" method="POST">
+			            <div class="form-group">
+			                <label>From:</label>
+							<select class="form-control" name="from" required onchange="departureSelected(this)">
+							  <option></option>
+							  <option th:each="flight: ${departureCities}" th:value="${flight.departureCity}" th:text="${flight.departureCity}"></option>
+							</select>
+			            </div>
+			            <div class="form-group">
+			                <label>To:</label>
+			                <input type="text" name="to" required class="form-control">
+			            </div>
+			            <div class="form-group">
+			                <label for="email">Departure Date:</label>
+			                <input type="date" name="departureDate" required class="form-control">
+			            </div>
+						
+			            <input class="btn btn-primary btn-lg" type="submit" value="Search" />
+			</form>
+			</div>
+			<div class="col-md-8">
+    			<div id="map" style="width:100%; height:100%;"></div>
+   			</div>
+		</div>
+	</div>
+</body>
+</html>
+<!-- 
+placeholder="mm-dd-yyyy" pattern="(0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[-](19|20)\d\d" -->
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+    var flights = /*[[${flights}]]*/ 'default';
+    console.log(flights);
+
+/*]]>*/
+</script>
+
+
+
+<script type="text/javascript">
+
+var destinations = [];
+var markers = [];
+var map;
+
+
+function departureSelected(sel) {
+	destinations = [];
+	console.log(sel.value);
+	flights.forEach(function(flight) {
+		if (flight.departureCity == sel.value && destinations.indexOf(flight.arrivalCity) == -1) {
+			destinations.push(flight.arrivalCity);
+		}
+	});
+	console.log(destinations);
+	initMap(sel.value);
+}
+
+
+
+
+
+// Initialize and add the map
+function initMap(departureCity) {
+    var locations = [
+      ['Berlin', 52.520008, 13.404954, 5],
+      ['Bucharest', 44.439663, 26.096306, 4],
+      ['Paris', 48.864716, 2.349014, 3],
+      ['London', 51.509865, -0.118092, 2],
+      ['Amsterdam', 52.370216, 4.895168, 1]
+    ];
+    
+    
+    deleteMarkers();
+    
+  // Centred on the location of Bucharest
+  var uluru = {lat:  44.439663, lng: 26.096306};
+
+  map = new google.maps.Map(
+      document.getElementById('map'), {zoom: 4, center: uluru});
+      
+  var marker;
+  // The marker, for departure city
+	locations.forEach(function(location) {
+		if (location[0] == departureCity) {
+			var dep = new google.maps.LatLng(location[1], location[2]);
+			marker = new google.maps.Marker({position: dep, map: map, icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'});
+		}
+	});
+  
+     var infowindow = new google.maps.InfoWindow();
+     
+           google.maps.event.addListener(marker, 'click', (function(marker) {
+		        return function() {
+		          infowindow.setContent(departureCity);
+		          infowindow.open(map, marker);
+		        }
+		      })(marker, i));
+
+    var i;
+    
+
+    for (i = 0; i < locations.length; i++) {
+      if (destinations.indexOf(locations[i][0]) != -1) {
+      addMarker(locations[i][1], locations[i][2]);
+	  marker = markers[markers.length - 1];
+	      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+	        return function() {
+	          infowindow.setContent(locations[i][0]);
+	          infowindow.open(map, marker);
+	        }
+	      })(marker, i));
+	   }
+    }
+}
+
+
+
+      // Adds a marker to the map and push to the array.
+      function addMarker(lat, long) {
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(lat, long),
+          map: map
+        });
+        markers.push(marker);
+      }
+
+      // Sets the map on all markers in the array.
+      function setMapOnAll(map) {
+        for (var i = 0; i < markers.length; i++) {
+          markers[i].setMap(map);
+        }
+      }
+
+      // Removes the markers from the map, but keeps them in the array.
+      function clearMarkers() {
+        setMapOnAll(null);
+      }
+
+      // Shows any markers currently in the array.
+      function showMarkers() {
+        setMapOnAll(map);
+      }
+
+      // Deletes all markers in the array by removing references to them.
+      function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+      }
+      
+    </script>
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1Q5mJzg8TY6l0NBV1Ov9TsNOOj1g4D6k&callback=initMap">
+</script>

@@ -1,0 +1,15 @@
+.color-red {
+	color: red;
+}
+
+.container {
+	margin-bottom: 50px;
+}
+
+.form-passenger {
+	padding-top: 40px;
+}
+
+h1, h2, h3, h4 {
+	font-weight: 1000;
+}
